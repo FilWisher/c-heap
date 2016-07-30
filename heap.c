@@ -21,11 +21,10 @@ void heapfree(heap *h) {
 }
 
 void memswap(void *a, void *b, uint size) {
-  void *tmp = malloc(size);
+  byte tmp[size];
   memmove(tmp, a, size);
   memmove(a, b, size);
   memmove(b, tmp, size);
-  free(tmp);
 }
 
 void heapinsert(heap *h, void *el) {
@@ -85,7 +84,11 @@ int heapremove(heap *h, void *el) {
   memmove(el, h->buf+h->elmsize, h->elmsize);
   memmove(h->buf+h->elmsize, h->buf+(h->elmsize*h->cnt), h->elmsize);
   
-  h->cnt--;
+  if (--h->cnt < h->cap/4) {
+    h->cnt /= 2;
+    h->buf = realloc(h->buf, h->elmsize*h->cap);
+  }
+  
   sift(h, 1); 
  
   return 1;
