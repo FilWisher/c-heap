@@ -13,6 +13,11 @@ int minheap(void *child, void *parent) {
   return *(int *)child > *(int *)parent;
 }
 
+typedef struct {
+  int a;
+  int b;
+} Complex;
+
 heap *prepareheap(comparefn compare, uint n) {
   
   int x;
@@ -24,6 +29,40 @@ heap *prepareheap(comparefn compare, uint n) {
   }
   
   return h;
+}
+
+heap *preparestructheap(comparefn compare, uint n) {
+  Complex c;
+  heap *h = heapcreate(sizeof(Complex), 8, compare);
+  
+  for (uint i = 0; i < n; i++) {
+    c.a = rand() % 50;
+    c.b = rand() % 50;
+    heapinsert(h, &c);
+  }
+  
+  return h;
+}
+
+int minstructheap(void *vchild, void *vparent) {
+  Complex *child = (Complex *)vchild;
+  Complex *parent = (Complex *)vparent;
+  
+  return child->a + child->b > parent->a + parent->b;
+}
+
+void teststructheap() {
+  uint n = 5;
+  heap *h = preparestructheap(minstructheap, n);
+
+  Complex last, c;
+  heapremove(h, &last);
+  for (uint i = 0; i < n-1; i++) {
+    heapremove(h, &c);
+    assert(c.a + c.b >= last.a + last.b);
+  }
+  
+  heapfree(h);
 }
   
 int main() {
@@ -50,4 +89,6 @@ int main() {
     assert(x <= last);
   }
   heapfree(h);
+  
+  teststructheap();
 }
